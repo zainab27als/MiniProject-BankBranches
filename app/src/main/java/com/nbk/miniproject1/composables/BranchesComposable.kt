@@ -38,26 +38,46 @@ fun BranchListScreen(
 ) {
     var sortByName by remember { mutableStateOf(false) }
     var filter247 by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
 
-    val displayedBranches = remember(branches, sortByName, filter247) {
+    val displayedBranches = remember(branches, sortByName, filter247, searchQuery) {
         var list = branches
-        if (filter247) list = list.filter { it.hours == "Open 24/7" }
-        if (sortByName) list = list.sortedBy { it.name }
+
+        if (filter247) {
+            list = list.filter { it.hours.equals("Open 24/7", ignoreCase = true) }
+        }
+
+        if (searchQuery.isNotBlank()) {
+            list = list.filter {
+                it.name.contains(searchQuery, ignoreCase = true) ||
+                        it.address.contains(searchQuery, ignoreCase = true)
+            }
+        }
+
+        if (sortByName) {
+            list = list.sortedBy { it.name }
+        }
+
         list
     }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        BranchSearchBar(
+            query = searchQuery,
+            onQueryChange = { searchQuery = it }
+        )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
                 onClick = { sortByName = !sortByName },
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = if (sortByName) "Unsort" else "Sort By Name")
+                Text(text = if (sortByName) "Unsort" else "Sort by Name")
             }
             Button(
                 onClick = { filter247 = !filter247 },
@@ -96,6 +116,7 @@ fun BranchListScreen(
                                 .size(64.dp)
                                 .padding(end = 16.dp)
                         )
+
                         Column {
                             Text(
                                 text = branch.name,
