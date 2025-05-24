@@ -8,7 +8,7 @@ object BranchRepository {
         return listOf(
             BranchData(
                 id = 1,
-                name = "Kuwait City Branch",
+                name = "NBK HQ - Kuwait City",
                 type = BranchType.MAIN,
                 address = "Downtown, Kuwait City",
                 phone = "+965 1234 5678",
