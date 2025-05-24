@@ -1,6 +1,7 @@
 package com.nbk.miniproject1.composables
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,23 +37,37 @@ fun BranchListScreen(
     onBranchClick: (BranchData) -> Unit
 ) {
     var sortByName by remember { mutableStateOf(false) }
-    val displayedBranches = remember(branches, sortByName) {
-        if (sortByName) branches.sortedBy { it.name } else branches
+    var filter247 by remember { mutableStateOf(false) }
+
+    val displayedBranches = remember(branches, sortByName, filter247) {
+        var list = branches
+        if (filter247) list = list.filter { it.hours == "Open 24/7" }
+        if (sortByName) list = list.sortedBy { it.name }
+        list
     }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Button(
-            onClick = { sortByName = !sortByName },
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = if (sortByName) "Unsort" else "Sort by Name")
+            Button(
+                onClick = { sortByName = !sortByName },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = if (sortByName) "Unsort" else "Sort By Name")
+            }
+            Button(
+                onClick = { filter247 = !filter247 },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = if (filter247) "Show All" else "Filter 24/7")
+            }
         }
 
-        LazyColumn(
-            contentPadding = PaddingValues(bottom = 16.dp)
-        ) {
+        LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
             items(displayedBranches) { branch ->
                 val isFavorite = branch.id == favoriteBranchId
 
@@ -81,7 +96,6 @@ fun BranchListScreen(
                                 .size(64.dp)
                                 .padding(end = 16.dp)
                         )
-
                         Column {
                             Text(
                                 text = branch.name,
