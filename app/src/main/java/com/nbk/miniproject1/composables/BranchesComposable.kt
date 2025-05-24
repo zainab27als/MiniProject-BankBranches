@@ -1,12 +1,16 @@
 package com.nbk.miniproject1.composables
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,54 +22,56 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.nbk.miniproject1.R
 import com.nbk.miniproject1.data.BranchData
-import com.nbk.miniproject1.data.BranchType
-
 
 @Composable
-fun BranchCard(branch: BranchData) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+fun BranchListScreen(
+    branches: List<BranchData>,
+    favoriteBranchId: Int?,
+    onBranchClick: (BranchData) -> Unit
+) {
+    LazyColumn {
+        items(branches) { branch ->
+            val isFavorite = branch.id == favoriteBranchId
 
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(branch.imageURi)
-                    .crossfade(true)
-                    .fallback(R.drawable.building)
-                    .error(R.drawable.building)
-                    .build(),
-                contentDescription = "Branch Image",
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
-            )
+                    .padding(8.dp)
+                    .clickable { onBranchClick(branch) },
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isFavorite) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Row(modifier = Modifier.padding(16.dp)) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(branch.imageURi)
+                            .crossfade(true)
+                            .fallback(R.drawable.building)
+                            .error(R.drawable.building)
+                            .build(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .padding(end = 16.dp)
+                    )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(text = branch.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text(text = "Type: ${branch.type}")
-            Text(text = "Address: ${branch.address}")
-            Text(text = "Phone: ${branch.phone}")
-            Text(text = "Hours: ${branch.hours}")
-            Text(text = "Location: ${branch.location}")
+                    Column {
+                        Text(
+                            text = branch.name,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        if (isFavorite) {
+                            Text(
+                                text = "🌟 Favorite",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
-
-
-//Branch Dummy data
-
-val sampleBranch = BranchData(
-    id = 1,
-    name = "Kuwait City Branch",
-    type = BranchType.MAIN,
-    address = "Downtown, Kuwait City",
-    phone = "+965 1234 5678",
-    hours = "8am - 3pm",
-    location = "https://maps.google.com",
-    imageURi = "https://images.skyscrapercenter.com/building/nbk_rendering-full_(c)foster.jpg"
-)
